@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import Modal from './components/Modal'
+import Sidebar from './components/navbar/index'
+
+import { Table, Heading, Button, Grid, GridItem, VStack, Flex } from "@chakra-ui/react"
+import { LuPlus, LuMinus  } from "react-icons/lu"
 
 import Auth from './components/auth'
 import { db } from './config/firebase'
@@ -7,14 +12,17 @@ import { getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase
 
 
 function App() {
+
+  // Estados para as categorias e produtos
   const [categorias, setCategorias] = useState([]);
   const [produtos, setProdutos] = useState([]);
 
+  // Referências para as coleções no Firebase
   const categoriasListaRef = collection(db, 'Categorias');
-  const produtosListaRef = collection(db, 'Produtos')
+  const produtosListaRef = collection(db, 'Produtos');
+  const listasComprasRef = collection(db, 'ListasCompras');
 
-  // const [atualizarProduto, setAtualizarProduto] = useState("");
-
+  // Função para buscar categorias
   const getCategorias = async () => {
     try {
       const data = await getDocs(categoriasListaRef)
@@ -26,10 +34,11 @@ function App() {
     }
   }
 
+  // Função para buscar produtos
   const getProdutos = async () => {
     try {
       const data = await getDocs(produtosListaRef);
-      const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}))
+      const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id, quantidade: 0}))
 
       setProdutos(filteredData)
     } catch(err){
@@ -37,32 +46,64 @@ function App() {
     }
   }
 
-  const cadastrarProduto = async (e, idCategoria) => {
-    // não permite que o formulario seja enviado da maneira tradicional
-    e.preventDefault();
+  // Função para cadastrar produto
+  const cadastrarProduto = async (props, cadastrarDb) => {
 
-    // pega campos do formulário
-    var novoProduto = Object.fromEntries(new FormData(e.target));
-    novoProduto['id_categoria'] = idCategoria;
+    if(cadastrarDb){
+      try{
+        await addDoc(produtosListaRef, props)
 
-    try{
-      await addDoc(produtosListaRef, novoProduto)
-
-      getProdutos();
-      // limpa form
-      e.target.reset();
-    } catch(err) {
-      console.error(err)
+        getProdutos();
+      } catch(err) {
+        console.error(err)
+      }
     }
 
+    props.id = Date.now();
+    setProdutos([...produtos, props])
+
+  }
+
+  // Função para adicionar quantidade de produto
+  const adicionarQuantidade = (idProduto) => {
+    const produtosAtualizados = produtos.map(p => p.id == idProduto ? 
+      {...p, quantidade : p.quantidade + 1} :
+      p
+    )
+
+    setProdutos(produtosAtualizados)
+  }
+
+  // Função para reduzir quantidade de produto
+  const reduzirQuantidade = (idProduto) => {
+    const produtosAtualizados = produtos.map(p => p.id == idProduto ? 
+      {...p, quantidade : p.quantidade > 0 ? p.quantidade - 1 : p.quantidade} :
+      p
+    )
+
+    setProdutos(produtosAtualizados)
   }
   
+  // Função para deletar produto
   const deletarProduto = async(id) => {
     const produtoDoc = doc(db, 'Produtos', id);
     deleteDoc(produtoDoc)
     getProdutos();
   }
 
+  // Função para cadastrar lista de compras
+  const cadastrarListaDeCompras = async() => {
+    console.log(produtos.filter(p => p.quantidade > 0))
+
+    try{
+      await addDoc(listasComprasRef, { produtos: produtos.filter(p => p.quantidade > 0), data: Date.parse(new Date()), concluida: false })
+
+    } catch(err){
+      console.error(err)
+    }
+  }
+
+  // Função para atualizar produto
   const atualizarProduto = async(e, id) => {
     e.preventDefault();
 
@@ -75,49 +116,77 @@ function App() {
     getProdutos();
   }
 
+  // Função para buscar categorias e produtos
   useEffect(() => {
     getCategorias();
     getProdutos();
   }, [])
   
+  // Renderização do componente
   return (
     <div className='App'>
+      <Sidebar />
       <Auth />
-
-      <div>
+      <div className='ContentApp'>
+        {/* Lista de categorias e produtos */}
         {categorias
         .sort((a, b) => a.nome.localeCompare(b.nome))
         .map((categoria) => {
           return (
             <div key={categoria.id}>
-              <h1>{categoria.nome}</h1>
-              {
-                produtos
-                .filter((produto) => produto.id_categoria == categoria.id)
-                .sort((a, b) => a.nome.localeCompare(b.nome))
-                .map((produto) => {
+              {/* Título da categoria */}
+              <Heading mt={'5'}>{categoria.nome}</Heading>
+              {/* Tabela de produtos */}
+              <Table.Root mt={'2'} key={categoria.id}>
+                <Table.Caption />
+                <Table.Body borderTopWidth="1px" key={categoria.id}>
+                  {/* Lista de produtos */}
+                  { produtos
+                  .filter((produto) => produto.id_categoria == categoria.id)
+                  .sort((a, b) => a.nome.localeCompare(b.nome))
+                  .map((produto) => {
                   return (
-                    <div key={produto.id} >
-                      <div> 
-                        {produto.nome} <button onClick={() => deletarProduto(produto.id)}>X</button> 
-                        <form onSubmit={(e) => atualizarProduto(e, produto.id)}><input type="text" name='nome' /> <button>Atualizar</button></form>
-                      </div>
-                      
-                    </div>
-                  )
-                })
-              }
-
+                    <Table.Row key={produto.id}>
+                      <Table.Cell>
+                        {produto.nome} 
+                      </Table.Cell>
+                      <Table.Cell textAlign="end" width={"200px"}>
+                        <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(10, 1fr)" alignItems={'center'} gap={'1'}>
+                          <GridItem colSpan={4}>
+                            <Button size={'sm'} variant={'outline'} onClick={() => reduzirQuantidade(produto.id)}><LuMinus /></Button>
+                          </GridItem>
+                          <GridItem colSpan={2}>
+                            {produto.quantidade}
+                          </GridItem>
+                          <GridItem colSpan={4}>
+                            <Button size={'sm'} variant={'outline'} onClick={() => adicionarQuantidade(produto.id)}><LuPlus /></Button>
+                          </GridItem>
+                        </Grid>
+                      </Table.Cell>
+                    </Table.Row>
+                  )})}
+                </Table.Body>
+              </Table.Root>
+              
+              {/* Modal para cadastrar produto */}
               <div>
-                <form onSubmit={(e) => cadastrarProduto(e, categoria.id)}>
-                  <input type="text" placeholder='Nome do produto' name='nome' />
-                  <button>Enviar</button>
-                </form>
+                 <Modal
+                   id_categoria={categoria.id}
+                   onSubmit={(dados, cadastrarDb) => {
+                     cadastrarProduto(dados, cadastrarDb)
+                   }}
+                 />
               </div>
             </div>
           )
         })}
+        
+        {/* Botao para cadastrar lista de compras */}
+        <Button onClick={() => cadastrarListaDeCompras()} variant="solid" colorPalette="green" size="sm" my={'5'} w={'100%'}>
+            <LuPlus /> Cadastrar lista de compras
+          </Button>
       </div>
+  
     </div>
   )
 }

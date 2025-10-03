@@ -34,14 +34,14 @@ const Auth = () => {
 
   return (
     <div>
-        <input placeholder="Email..." onChange={(e) => setEmail(e.target.value) }/>
+        {/* <input placeholder="Email..." onChange={(e) => setEmail(e.target.value) }/>
         <input type='password' placeholder="Senha..." onChange={(e) => setPassword(e.target.value) }/>
 
         <button onClick={signIn}>Entrar</button>
 
         <button onClick={signInWithGoogle}>Entrar com Google</button>
 
-        <button onClick={logout}>Sair</button>
+        <button onClick={logout}>Sair</button> */}
     </div>
   )
 }
