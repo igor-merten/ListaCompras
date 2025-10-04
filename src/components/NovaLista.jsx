@@ -91,17 +91,26 @@ function NovaLista() {
     getProdutos();
   }
 
-  // Função para cadastrar lista de compras
-  const cadastrarListaDeCompras = async() => {
-    console.log(produtos.filter(p => p.quantidade > 0))
+// Função para cadastrar lista de compras
+// const cadastrarListaDeCompras = async(dados, cadastrarDb) => {
+//   console.log('Dados recebidos:', dados)
 
-    try{
-      await addDoc(listasComprasRef, { produtos: produtos.filter(p => p.quantidade > 0), data: Date.parse(new Date()), concluida: false })
-
-    } catch(err){
-      console.error(err)
-    }
-  }
+//   if (cadastrarDb) {
+//     try {
+//       await addDoc(listasComprasRef, { 
+//         nome: dados.nome,
+//         produtos: dados.produtos,
+//         data: Date.now(),
+//         concluida: false 
+//       })
+      
+//       console.log('Lista cadastrada com sucesso!')
+      
+//     } catch(err) {
+//       console.error(err)
+//     }
+//   }
+// }
 
   // Função para atualizar produto
   const atualizarProduto = async(e, id) => {
@@ -181,9 +190,7 @@ function NovaLista() {
         {/* Modal para cadastrar lista de compras */}
         <div>
             <ModalNovaListaDeCompras
-              onSubmit={(dados, cadastrarDb) => {
-                cadastrarListaDeCompras(dados, cadastrarDb)
-              }}
+              produtos={produtos.filter(p => p.quantidade > 0)}
             />
         </div>
         
