@@ -100,7 +100,7 @@ const contactDialog = createOverlay((props) => {
 })
 
 
-const Modal = ({ id_categoria, onSubmit }) => {
+const ModalNovoProduto = ({ id_categoria, onSubmit }) => {
   return (
     <>
       <Button
@@ -122,4 +122,4 @@ const Modal = ({ id_categoria, onSubmit }) => {
   )
 }
 
-export default Modal
+export default ModalNovoProduto
