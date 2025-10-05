@@ -1,0 +1,4 @@
+npm i react
+npm i chackraui
+npm i firebase
+npm install react-router-dom

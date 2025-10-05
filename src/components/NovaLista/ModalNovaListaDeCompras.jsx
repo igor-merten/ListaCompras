@@ -12,10 +12,12 @@ import {
 import { LuPlus } from "react-icons/lu"
 import { useState, useEffect } from "react"
 import { getDocs, collection, addDoc } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { db } from '../../config/firebase'
+import { useNavigate } from "react-router-dom"
 
 const contactDialog = createOverlay((props) => {
   const { produtos, ...rest } = props // ✅ Recebe produtos das props
+  const navigate = useNavigate();
 
   const [nomeNovaListaCompras, setNomeNovaListaCompras] = useState(new Date().toLocaleDateString('pt-BR', { 
     month: 'long', 
@@ -78,6 +80,8 @@ const contactDialog = createOverlay((props) => {
 
     try{
       await addDoc(listasComprasRef, novaLista)
+
+      navigate('/') 
 
     } catch(err){
       console.error(err)

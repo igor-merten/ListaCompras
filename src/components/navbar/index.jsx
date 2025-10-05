@@ -9,6 +9,7 @@ import {
 import Logo from '../../assets/images/Logo.png'
 import { FaClipboardList } from "react-icons/fa";
 import { LuShoppingCart, LuListTodo  } from "react-icons/lu";
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -118,9 +119,14 @@ const Sidebar = () => {
 
         {/* Menu Items */}
         <Box>
-          <MenuItem label="Lista compras" isActive icon={<LuListTodo  />} />
-          {/* <MenuItem label="Usuários" badge="12" icon={<FaClipboardList />} /> */}
-          <MenuItem label="Produtos" icon={<LuShoppingCart />} />
+          <NavLink to={'/'} 
+          > 
+            <MenuItem label="Listas de compras" icon={<LuListTodo  />} isActive={location.pathname === '/'} />
+          </NavLink>
+          {/* <NavLink label="Usuários" badge="12" icon={<FaClipboardList />} > </NavLink> */}
+          <NavLink to={'Produtos'}> 
+            <MenuItem  label="Produtos" icon={<LuShoppingCart />} isActive={location.pathname === '/Produtos'} />
+          </NavLink>
         </Box>
 
         
