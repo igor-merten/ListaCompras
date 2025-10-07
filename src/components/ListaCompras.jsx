@@ -31,6 +31,7 @@ function ListaCompras() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [error, setError] = useState(null)
   
   // Verifica se o usuário está logado
   useEffect(() => {
@@ -69,6 +70,12 @@ function ListaCompras() {
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setIsListaLoading(false)
+      // 💡 Verifica se é erro de conexão
+      if (!navigator.onLine) {
+        setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao carregar a lista. Verifique se você tem permissão de acesso.');
+      }
       return [];
     }
   };
@@ -141,8 +148,20 @@ function ListaCompras() {
   return (
     <div className='ListaCompras'>
         <Sidebar />
-
         <div className='ContentApp'>
+        {error && (
+          <Box
+            bg="red.50"
+            border="1px solid"
+            borderColor="red.200"
+            color="red.700"
+            p="2"
+            borderRadius="md"
+            mt={3}
+          >
+            <Text fontSize="sm">{error}</Text>
+          </Box>
+        )}
           {/* Lista de categorias e produtos */}
         {categorias
           .filter(categoria => lista.produtos.some(p => p.id_categoria === categoria.id))

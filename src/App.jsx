@@ -59,6 +59,7 @@ function App() {
   const [isListasLoading, setIsListasLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
   
   // Verifica se o usuário está logado
   useEffect(() => {
@@ -92,6 +93,14 @@ function App() {
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setIsListasLoading(false)
+
+      // 💡 Verifica se é erro de conexão
+      if (!navigator.onLine) {
+        setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao buscar suas listas. Verifique se você tem permissão de acesso.');
+      }
+
       return [];
     }
   };
@@ -121,6 +130,21 @@ function App() {
       <Sidebar />
 
       <div className='ContentApp'>
+
+      {error && (
+          <Box
+            bg="red.50"
+            border="1px solid"
+            borderColor="red.200"
+            color="red.700"
+            p="2"
+            borderRadius="md"
+            mt={3}
+          >
+            <Text fontSize="sm">{error}</Text>
+          </Box>
+        )}
+
         <Heading mt={'5'} size={'md'}>Minhas Listas</Heading>
 
         {/* Lista pendentes  */}

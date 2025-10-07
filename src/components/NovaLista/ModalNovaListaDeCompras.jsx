@@ -7,7 +7,9 @@ import {
   Stack,
   createOverlay,
   Group,
-  RadioCard
+  RadioCard,
+  Box,
+  Text
 } from "@chakra-ui/react"
 import { LuPlus, LuCheck } from "react-icons/lu"
 import { useState, useEffect } from "react"
@@ -24,7 +26,8 @@ const contactDialog = createOverlay((props) => {
     year: 'numeric' 
   }).replace(/^\w/, (c) => c.toUpperCase())
   )
-  const [listasCadastradas, setListasCadastradas] = useState([])
+
+  const [error, setError] = useState(null) // ⚠️ Novo estado para mensagens de erro
 
   const listasComprasRef = collection(db, 'ListasCompras');
 
@@ -36,7 +39,6 @@ const contactDialog = createOverlay((props) => {
         ...doc.data()
       }));
       
-      setListasCadastradas(filteredData);
       return filteredData;
       
     } catch (error) {
@@ -83,15 +85,25 @@ const contactDialog = createOverlay((props) => {
 
       navigate('/') 
 
+      props.onOpenChange?.({ open: false });
+      setNomeNovaListaCompras("");
+
     } catch(err){
       console.error(err)
+
+      // 💡 Verifica se é erro de conexão
+      if (!navigator.onLine) {
+        setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao cadastrar a lista. Verifique se você tem permissão de acesso e tente novamente em instantes.');
+      }
     }
 
     // Fecha o dialog
-    props.onOpenChange?.({ open: false })
+    // props.onOpenChange?.({ open: false })
 
     // Limpa o campo
-    setNomeNovaListaCompras("")
+    // setNomeNovaListaCompras("")
   }
 
   return (
@@ -106,6 +118,18 @@ const contactDialog = createOverlay((props) => {
               </Dialog.Header>
               <Dialog.Body>
                 <Stack gap="4">
+                {error && (
+                    <Box
+                      bg="red.50"
+                      border="1px solid"
+                      borderColor="red.200"
+                      color="red.700"
+                      p="2"
+                      borderRadius="md"
+                    >
+                      <Text fontSize="sm">{error}</Text>
+                    </Box>
+                  )}
                   <Input
                     value={nomeNovaListaCompras}
                     onChange={(e) => setNomeNovaListaCompras(e.target.value)}

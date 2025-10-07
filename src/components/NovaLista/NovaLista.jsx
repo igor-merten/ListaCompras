@@ -7,7 +7,7 @@ import ModalNovaListaDeCompras from './ModalNovaListaDeCompras'
 import Sidebar from '../navbar'
 import Loading from '../Loading'
 
-import { Table, Heading, Button, Grid, GridItem } from "@chakra-ui/react"
+import { Table, Heading, Button, Grid, GridItem, Box, Text } from "@chakra-ui/react"
 import { LuPlus, LuMinus } from "react-icons/lu"
 
 import { db, auth } from '../../config/firebase'
@@ -97,6 +97,7 @@ function NovaLista() {
   const [isProdutosLoading, setIsProdutosLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null)
 
   const categoriasListaRef = collection(db, 'Categorias');
   const produtosListaRef = collection(db, 'Produtos');
@@ -134,6 +135,13 @@ function NovaLista() {
     } catch(err){
       console.error(err)
       setIsProdutosLoading(false)
+
+      // 💡 Verifica se é erro de conexão
+      if (!navigator.onLine) {
+        setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao carregar os produtos. Verifique se você tem permissão de acesso.');
+      }
     }
   }
 
@@ -218,6 +226,19 @@ function NovaLista() {
     <div className='NovaLista'>
       <Sidebar />
       <div className='ContentApp'>
+      {error && (
+          <Box
+            bg="red.50"
+            border="1px solid"
+            borderColor="red.200"
+            color="red.700"
+            p="2"
+            borderRadius="md"
+            mt={3}
+          >
+            <Text fontSize="sm">{error}</Text>
+          </Box>
+        )}
         {categoriasOrdenadas.map((categoria) => (
           <CategoriaSection
             key={categoria.id}
