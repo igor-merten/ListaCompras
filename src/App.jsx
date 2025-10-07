@@ -10,7 +10,6 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { getDocs, collection, doc } from 'firebase/firestore'
 
 import { Tabs, AbsoluteCenter, Heading, Button, Card, Text, Box, Container, Flex, IconButton, VStack, HStack } from "@chakra-ui/react"
-import { div } from 'framer-motion/client'
 import { LuSearch, LuPlus, LuChevronRight, LuCheck, LuList } from 'react-icons/lu'
 
 import { Link } from 'react-router-dom'
@@ -57,14 +56,15 @@ const ListCard = ({ nome, data, concluida = false, icon: IconComponent }) => (
 );
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isListasLoading, setIsListasLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
   
   // Verifica se o usuário está logado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsLoading(false);
+      setIsAuthReady(true);
     });
 
     return () => unsubscribe();
@@ -76,6 +76,7 @@ function App() {
 
   // Função para buscar listas
   const getListas = async () => {
+    setIsListasLoading(true)
     try {
       const data = await getDocs(listasComprasRef);
       const filteredData = data.docs.map((doc) => ({
@@ -84,11 +85,13 @@ function App() {
       }));
       
       setListas(filteredData);
-      console.log(filteredData)
+      setIsListasLoading(false)
+      
       return filteredData;
       
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+      setIsListasLoading(false)
       return [];
     }
   };
@@ -100,9 +103,10 @@ function App() {
     getListas();
   }, [])
 
+  const isLoading = !isAuthReady || isListasLoading;
   // Enquanto está verificando a autenticação, mostra o Loading
   if (isLoading) {
-    return <Loading />;
+    return (<div><Sidebar /> <Loading /></div>);
   }
 
   // Se NÃO estiver logado, mostra apenas o Auth
@@ -122,38 +126,64 @@ function App() {
         {/* Lista pendentes  */}
         <Heading mt={'3'} mb={"2"} size={'xl'} textAlign={'left'}>Pendentes</Heading>
         <VStack align="stretch" spacing={4} mb={2}>
-          {listas
+          {listas.filter((lista) => !lista.concluida).length === 0 ? (
+            <Text color="gray.500" 
+            textAlign="center" 
+            bg="white"
+            borderRadius="xl"
+            border={'1px solid #ddd'}
+            p={4}
+            mb={0}
+            >
+              Nenhuma lista pendente
+            </Text>
+          ) : (
+          listas
           .sort((a, b) => a.nome.localeCompare(b.nome))
           .filter((lista) => !lista.concluida)
           .map((list, index) => (
             <Link key={list.id} to={`Lista/${list.data}`}>
-              <ListCard border={'1px solid'}
+              <ListCard
                 key={index}
                 nome={list.nome}
                 data={list.data}
                 icon={LuList}
               />
             </Link>
-          ))}
+          ))
+        )}
         </VStack>
 
         {/* Listas Concluídas */}
         <Heading mt={'5'} mb={"2"} size={'xl'} textAlign={'left'}>Concluídas</Heading>
         <VStack align="stretch" spacing={4} mb={2}>
-        {listas
-          .sort((a, b) => a.nome.localeCompare(b.nome))
-          .filter((lista) => lista.concluida)
-          .map((list, index) => (
-          <Link key={list.id} to={`Lista/${list.data}`}>
-            <ListCard
-              key={index}
-              nome={list.nome}
-              data={list.data}
-              icon={LuCheck}
-              concluida={true}
-            />
-          </Link>
-        ))}
+        {listas.filter((lista) => lista.concluida).length === 0 ? (
+            <Text color="gray.500" 
+            textAlign="center" 
+            bg="white"
+            borderRadius="xl"
+            border={'1px solid #ddd'}
+            p={4}
+            mb={0}
+            >
+              Nenhuma lista concluída
+            </Text>
+          ) : (
+          listas
+            .sort((a, b) => a.nome.localeCompare(b.nome))
+            .filter((lista) => lista.concluida)
+            .map((list, index) => (
+            <Link key={list.id} to={`Lista/${list.data}`}>
+              <ListCard
+                key={index}
+                nome={list.nome}
+                data={list.data}
+                icon={LuCheck}
+                concluida={true}
+              />
+            </Link>
+          ))
+        )}
         </VStack>
 
         <Link to={'/NovaLista'}>

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { auth } from '../../config/firebase'
+import { signOut } from 'firebase/auth'
 import {
   Box,
   Text,
@@ -16,6 +18,15 @@ const Sidebar = () => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsSidebarOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -91,6 +102,7 @@ const Sidebar = () => {
         zIndex="1000"
         transition="right 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         boxShadow={isSidebarOpen ? "2xl" : { base: "none", md: "lg" }}
+        overflow="hidden"
       >
         {/* Logo */}
         <Flex alignItems="center" justifyContent="space-between" mb="8">
@@ -128,7 +140,17 @@ const Sidebar = () => {
             <MenuItem  label="Produtos" icon={<LuShoppingCart />} isActive={location.pathname === '/Produtos'} />
           </NavLink> */}
         </Box>
-
+        {/* Logout button fixed at bottom */}
+        <Box position="absolute" left="4" right="4" bottom="4">
+          <Button
+            width="100%"
+            variant="outline"
+            colorPalette="red"
+            onClick={handleLogout}
+          >
+            Sair
+          </Button>
+        </Box>
         
       </Box>
     </>

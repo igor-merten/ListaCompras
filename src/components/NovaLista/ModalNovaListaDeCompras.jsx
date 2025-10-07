@@ -52,12 +52,12 @@ const contactDialog = createOverlay((props) => {
     const listas = await getListas();
     
     // Agora você tem os dados e pode fazer suas checagens
-    console.log('Dados recebidos:', listas);
-    console.log('Produtos:', produtos); // ✅ produtos agora existe aqui
+    // console.log('Dados recebidos:', listas);
+    // console.log('Produtos:', produtos); // ✅ produtos agora existe aqui
 
-    listas.forEach(l => {
-      console.log(l.nome)
-    })
+    // listas.forEach(l => {
+    //   console.log(l.nome)
+    // })
 
     // Verifica se o nome já existe e adiciona contador se necessário
     let nomeAtualizado = nomeNovaListaCompras.trim(); // Remove espaços em branco
@@ -76,7 +76,7 @@ const contactDialog = createOverlay((props) => {
     novaLista.data = Date.parse(new Date())
     novaLista.concluida = false;
 
-    console.log(novaLista)
+    // console.log(novaLista)
 
     try{
       await addDoc(listasComprasRef, novaLista)

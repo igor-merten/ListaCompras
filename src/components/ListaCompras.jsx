@@ -1,6 +1,6 @@
 import '../App.css'
 
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 import Sidebar from './navbar/index'
@@ -25,14 +25,18 @@ import { LuShoppingCart, LuPlus, LuCheck  } from 'react-icons/lu'
 
 
 function ListaCompras() {
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
+  const [isCategoriasLoading, setIsCategoriasLoading] = useState(true);
+  const [isListaLoading, setIsListaLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   
   // Verifica se o usuário está logado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsLoading(false);
+      setIsAuthReady(true);
     });
 
     return () => unsubscribe();
@@ -49,7 +53,7 @@ function ListaCompras() {
 
   // Função para buscar listas
   const getListaDB = async () => {
-    setIsLoading(true)
+    setIsListaLoading(true)
     try {
       const data = await getDocs(listasComprasRef);
       const filteredData = data.docs.map((doc) => ({
@@ -58,25 +62,28 @@ function ListaCompras() {
       }));
       
       setLista(filteredData.find((l) => l.data == params.dataLista));
-      setIsLoading(false);
+      setIsListaLoading(false);
 
       return filteredData;
       
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+      setIsListaLoading(false)
       return [];
     }
   };
 
     // Buscar categorias
     const getCategorias = async () => {
-      setIsLoading(true)
+      setIsCategoriasLoading(true)
       try {
         const data = await getDocs(categoriasListaRef);
         const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}));
         setCategorias(filteredData);
+        setIsCategoriasLoading(false)
       } catch(err) {
         console.error(err);
+        setIsCategoriasLoading(false)
       }
     }
 
@@ -98,6 +105,19 @@ function ListaCompras() {
     }
   };
 
+  // Função para finalizar lista
+  const finalizarLista = async () => {
+    try {
+      const listaDoc = doc(db, 'ListasCompras', lista.id);
+      await updateDoc(listaDoc, { concluida: true });
+      
+      // Redireciona para a página inicial
+      navigate('/');
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
 
   // Função para buscar categorias e produtos
   useEffect(() => {
@@ -105,9 +125,11 @@ function ListaCompras() {
     getListaDB();
   }, [])
 
+  const isLoading = !isAuthReady || isCategoriasLoading || isListaLoading;
+
   // Enquanto está verificando a autenticação, mostra o Loading
-  if (isLoading || !lista) {
-    return <Loading />;
+  if (isLoading) {
+    return (<div><Sidebar /> <Loading /></div>);
   }
 
   // Se NÃO estiver logado, mostra apenas o Auth
@@ -161,15 +183,19 @@ function ListaCompras() {
                               </Text>
                             </Table.Cell>
                             <Table.Cell textAlign="end" width={"110px"}>
-                              <Button 
-                                size={'sm'} 
-                                color={produto.adicionado ? 'gray' : 'green.500'}
-                                variant={produto.adicionado ? 'outline' : 'outline'}
-                                onClick={() => marcarComoAdicionado(produto.id)}
-                                width="100%"
-                              >
-                                {produto.adicionado ? 'Desfazer' : <LuShoppingCart  /> }
-                              </Button>
+                              {!lista.concluida && (
+                                <Button 
+                                  size={'sm'} 
+                                  color={produto.adicionado ? 'gray' : 'green.500'}
+                                  variant={produto.adicionado ? 'outline' : 'outline'}
+                                  onClick={() => marcarComoAdicionado(produto.id)}
+                                  width="100%"
+                                  _active={{ transform: 'scale(0.95)', bg: 'gray.100' }}
+                                  transition="all 0.05s"
+                                >
+                                  {produto.adicionado ? 'Desfazer' : <LuShoppingCart  /> }
+                                </Button>
+                              )}
                             </Table.Cell>
                           </Table.Row>
                         )
@@ -180,17 +206,21 @@ function ListaCompras() {
             )
           })}
 
-          
-        <Button
-        mt={5}
-            width={'100%'}
-            variant="solid" 
-            colorPalette="green" 
-            size="sm" 
-            mb={'3'}
-          >
-            <LuCheck  /> Finalizar lista
-          </Button>
+        {!lista.concluida && (
+            <Button
+              mt={5}
+              width={'100%'}
+              variant="solid" 
+              colorPalette="green" 
+              size="sm" 
+              mb={'3'}
+              onClick={finalizarLista}
+              _active={{ transform: 'scale(0.98)' }}
+              transition="all 0.05s"
+              >
+                <LuCheck  /> Finalizar lista
+            </Button>
+          )}
         </div>
 
   

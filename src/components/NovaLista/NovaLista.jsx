@@ -93,23 +93,29 @@ const CategoriaSection = memo(({ categoria, produtos, onAdicionar, onReduzir, on
 function NovaLista() {
   const [categorias, setCategorias] = useState([]);
   const [produtos, setProdutos] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCategoriasLoading, setIsCategoriasLoading] = useState(true);
+  const [isProdutosLoading, setIsProdutosLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
 
   const categoriasListaRef = collection(db, 'Categorias');
   const produtosListaRef = collection(db, 'Produtos');
 
   const getCategorias = async () => {
+    setIsCategoriasLoading(true)
     try {
       const data = await getDocs(categoriasListaRef)
       const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}))
       setCategorias(filteredData)
+      setIsCategoriasLoading(false)
     } catch(err){
       console.error(err)
+      setIsCategoriasLoading(false)
     }
   }
 
   const getProdutos = async () => {
+    setIsProdutosLoading(true)
     try {
       const data = await getDocs(produtosListaRef);
       const produtosObj = {};
@@ -124,8 +130,10 @@ function NovaLista() {
       });
 
       setProdutos(produtosObj);
+      setIsProdutosLoading(false)
     } catch(err){
       console.error(err)
+      setIsProdutosLoading(false)
     }
   }
 
@@ -175,7 +183,7 @@ function NovaLista() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsLoading(false);
+      setIsAuthReady(true);
     });
 
     return () => unsubscribe();
@@ -196,8 +204,10 @@ function NovaLista() {
     [categorias]
   );
 
+  const isLoading = !isAuthReady || isCategoriasLoading || isProdutosLoading;
+
   if (isLoading) {
-    return <Loading />;
+    return (<div><Sidebar /> <Loading /></div>);
   }
 
   if (!user) {
