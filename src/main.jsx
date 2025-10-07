@@ -18,13 +18,18 @@ const router = createBrowserRouter([
     errorElement: <NotFoundPage />
   },
   {
-    path: '/teste',
+    path: '/NovaLista',
     element: <NovaLista />,
     errorElement: <NotFoundPage />
   },
   {
     path: '*',
     element: <NotFoundPage />
+  }, 
+  {
+    path: '/Lista/:dataLista',
+    element: <ListaCompras />,
+    errorElement: <NotFoundPage />
   }
 ]);
 

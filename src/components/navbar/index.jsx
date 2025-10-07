@@ -124,9 +124,9 @@ const Sidebar = () => {
             <MenuItem label="Listas de compras" icon={<LuListTodo  />} isActive={location.pathname === '/'} />
           </NavLink>
           {/* <NavLink label="Usuários" badge="12" icon={<FaClipboardList />} > </NavLink> */}
-          <NavLink to={'Produtos'}> 
+          {/* <NavLink to={'Produtos'}> 
             <MenuItem  label="Produtos" icon={<LuShoppingCart />} isActive={location.pathname === '/Produtos'} />
-          </NavLink>
+          </NavLink> */}
         </Box>
 
         

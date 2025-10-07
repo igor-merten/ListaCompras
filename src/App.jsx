@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-// import NovaLista from './components/NovaLista/NovaLista'
 import Sidebar from './components/navbar/index'
 import Auth from './components/auth'
 import Loading from './components/Loading'
@@ -10,12 +9,52 @@ import { db, auth } from './config/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getDocs, collection, doc } from 'firebase/firestore'
 
-import { Tabs, AbsoluteCenter, Heading, Button, Card, Text, Box } from "@chakra-ui/react"
+import { Tabs, AbsoluteCenter, Heading, Button, Card, Text, Box, Container, Flex, IconButton, VStack, HStack } from "@chakra-ui/react"
 import { div } from 'framer-motion/client'
-import { LuPlus } from 'react-icons/lu'
+import { LuSearch, LuPlus, LuChevronRight, LuCheck, LuList } from 'react-icons/lu'
 
 import { Link } from 'react-router-dom'
 
+const ListCard = ({ nome, data, concluida = false, icon: IconComponent }) => (
+  <Box
+    bg="white"
+    borderRadius="xl"
+    border={'1px solid #ddd'}
+    p={4}
+    mb={0}
+    cursor="pointer"
+  >
+    <HStack spacing={4} justify="space-between">
+      <HStack spacing={4}>
+        <Box
+          bg={concluida ? 'gray.100' : 'green.100'}
+          p={3}
+          borderRadius="lg"
+        >
+          <IconComponent
+            size={24}
+            color={concluida ? '#718096' : '#16a34a'}
+          />
+        </Box>
+        <Box>
+          <Text
+            textAlign={'left'}
+            fontSize="lg"
+            fontWeight="semibold"
+            color={concluida ? 'gray.400' : 'gray.800'}
+            textDecoration={concluida ? 'line-through' : 'none'}
+          >
+            {nome}
+          </Text>
+          <Text fontSize="sm" color="gray.500" textAlign={'left'}>
+            Criada em {new Date(data).toLocaleDateString('pt-BR', {day: 'numeric', month: 'long', year: 'numeric'})}
+          </Text>
+        </Box>
+      </HStack>
+      <LuChevronRight size={24} color="#A0AEC0" />
+    </HStack>
+  </Box>
+);
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +95,7 @@ function App() {
 
   // getListas()
 
-    // Função para buscar categorias e produtos
+  // Função para buscar categorias e produtos
   useEffect(() => {
     getListas();
   }, [])
@@ -78,56 +117,46 @@ function App() {
       <Sidebar />
 
       <div className='ContentApp'>
-        <Heading mt={'5'}>Listas de feira</Heading>
-        <Tabs.Root defaultValue="ListToDo" mt={'5'}>
-          <Tabs.List justifyContent="center">
-            <Tabs.Trigger value="ListToDo">
-              {/* <LuUser /> */}
-              A fazer
-            </Tabs.Trigger>
-            <Tabs.Trigger value="ListDone">
-              {/* <LuSquareCheck /> */}
-              Feitas
-            </Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="ListToDo">
-            {listas
-            .sort((a, b) => a.nome.localeCompare(b.nome))
-            .filter((lista) => !lista.concluida)
-            .map((l) => {
-              return(
-                <Card.Root variant={'outline'} key={l.id} mb={'2'}>
-                  <Card.Body gap="2">
-                    <Card.Title mb="2">{l.nome}</Card.Title>
-                    <Card.Description>
-                      {l.produtos.length} produtos <br /> 
-                      Criada em {new Date(l.data).toLocaleDateString()}
-                    </Card.Description>
-                  </Card.Body>
-                </Card.Root>
-              )
-            })}
-          </Tabs.Content>
-          <Tabs.Content value="ListDone">
-            {listas
-              .sort((a, b) => a.nome.localeCompare(b.nome))
-              .filter((lista) => lista.concluida)
-              .map((l) => {
-                return(
-                  <Card.Root variant={'outline'} key={l.id} mb={'2'}>
-                  <Card.Body gap="2">
-                    <Card.Title mb="2">{l.nome}</Card.Title>
-                    <Card.Description>
-                      {l.produtos.length} produtos <br /> 
-                      Criada em {new Date(l.data).toLocaleDateString()}
-                    </Card.Description>
-                  </Card.Body>
-                </Card.Root>
-                )
-            })}
-          </Tabs.Content>
-        </Tabs.Root>
-        <Link to={'/teste'}>
+        <Heading mt={'5'} size={'md'}>Minhas Listas</Heading>
+
+        {/* Lista pendentes  */}
+        <Heading mt={'3'} mb={"2"} size={'xl'} textAlign={'left'}>Pendentes</Heading>
+        <VStack align="stretch" spacing={4} mb={2}>
+          {listas
+          .sort((a, b) => a.nome.localeCompare(b.nome))
+          .filter((lista) => !lista.concluida)
+          .map((list, index) => (
+            <Link key={list.id} to={`Lista/${list.data}`}>
+              <ListCard border={'1px solid'}
+                key={index}
+                nome={list.nome}
+                data={list.data}
+                icon={LuList}
+              />
+            </Link>
+          ))}
+        </VStack>
+
+        {/* Listas Concluídas */}
+        <Heading mt={'5'} mb={"2"} size={'xl'} textAlign={'left'}>Concluídas</Heading>
+        <VStack align="stretch" spacing={4} mb={2}>
+        {listas
+          .sort((a, b) => a.nome.localeCompare(b.nome))
+          .filter((lista) => lista.concluida)
+          .map((list, index) => (
+          <Link key={list.id} to={`Lista/${list.data}`}>
+            <ListCard
+              key={index}
+              nome={list.nome}
+              data={list.data}
+              icon={LuCheck}
+              concluida={true}
+            />
+          </Link>
+        ))}
+        </VStack>
+
+        <Link to={'/NovaLista'}>
           <Button
             width={'100%'}
             variant="solid" 

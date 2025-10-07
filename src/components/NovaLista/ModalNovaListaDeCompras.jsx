@@ -9,7 +9,7 @@ import {
   Group,
   RadioCard
 } from "@chakra-ui/react"
-import { LuPlus } from "react-icons/lu"
+import { LuPlus, LuCheck } from "react-icons/lu"
 import { useState, useEffect } from "react"
 import { getDocs, collection, addDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
@@ -144,7 +144,7 @@ const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => { // ✅ Recebe prod
         my={'5'} 
         w={'100%'}
       >
-        <LuPlus /> Cadastrar lista de compras
+        <LuCheck /> Cadastrar lista de compras
       </Button>
       <contactDialog.Viewport />
     </>
