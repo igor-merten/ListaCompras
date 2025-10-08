@@ -42,13 +42,14 @@ const contactDialog = createOverlay((props) => {
         <Dialog.Positioner>
           <Dialog.Content>
             <form onSubmit={e => handleSubmit(e, props)}>
-                <Dialog.Header>
+                <Dialog.Header pb={2}>
                   <Dialog.Title>Novo Produto</Dialog.Title>
                 </Dialog.Header>
               <Dialog.Body>
                 <Stack gap="4">
                   <Input
                     value={name}
+                    fontSize="16px"
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Insira o nome do produto"
                   />
@@ -113,7 +114,7 @@ const ModalNovoProduto = ({ id_categoria, onSubmit }) => {
         width={'100%'}
         variant="plain"
         color="green.500"
-        size={'sm'}
+        size={'lg'}
       >
         <LuCirclePlus  /> Novo Produto
       </Button>

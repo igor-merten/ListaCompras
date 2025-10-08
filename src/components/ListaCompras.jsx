@@ -170,7 +170,7 @@ function ListaCompras() {
             return (
               <div key={categoria.id}>
                 {/* Título da categoria */}
-                <Heading mt={'5'}>{categoria.nome}</Heading>
+                <Heading mt={'5'} size={'2xl'}>{categoria.nome}</Heading>
                 
                 {/* Tabela de produtos */}
                 <Table.Root mt={'2'}>
@@ -187,24 +187,25 @@ function ListaCompras() {
                             opacity={produto.adicionado ? 0.5 : 1}
                             transition="all 0.2s"
                           >
-                            <Table.Cell width={"60px"}>
+                            <Table.Cell w={"20px"} py={8} pl={0} pr={0} mr={0}>
                               <Text
+                                pl={0}
                                 fontWeight="semibold"
-                                fontSize="md"
+                                fontSize="lg"
                                 textDecoration={produto.adicionado ? 'line-through' : 'none'}
                               >
                                 {produto.quantidade}
                               </Text>
                             </Table.Cell>
-                            <Table.Cell>
-                              <Text fontSize="md" textDecoration={produto.adicionado ? 'line-through' : 'none'}>
+                            <Table.Cell pl={0} ml={0}>
+                              <Text fontSize="lg" textAlign="left" textDecoration={produto.adicionado ? 'line-through' : 'none'}>
                                 {produto.nome}
                               </Text>
                             </Table.Cell>
-                            <Table.Cell textAlign="end" width={"110px"}>
+                            <Table.Cell textAlign="end" width={"130px"} px={0}>
                               {!lista.concluida && (
                                 <Button 
-                                  size={'sm'} 
+                                  size={'lg'} 
                                   color={produto.adicionado ? 'gray' : 'green.500'}
                                   variant={produto.adicionado ? 'outline' : 'outline'}
                                   onClick={() => marcarComoAdicionado(produto.id)}
@@ -231,7 +232,7 @@ function ListaCompras() {
               width={'100%'}
               variant="solid" 
               colorPalette="green" 
-              size="sm" 
+              size="xl" 
               mb={'3'}
               onClick={finalizarLista}
               _active={{ transform: 'scale(0.98)' }}

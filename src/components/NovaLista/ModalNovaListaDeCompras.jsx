@@ -16,10 +16,12 @@ import { useState, useEffect } from "react"
 import { getDocs, collection, addDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
 import { useNavigate } from "react-router-dom"
+import Loading from "../Loading"
 
 const contactDialog = createOverlay((props) => {
   const { produtos, ...rest } = props // ✅ Recebe produtos das props
   const navigate = useNavigate();
+  const [carregando, setCarregando] = useState(false)
 
   const [nomeNovaListaCompras, setNomeNovaListaCompras] = useState(new Date().toLocaleDateString('pt-BR', { 
     month: 'long', 
@@ -49,6 +51,7 @@ const contactDialog = createOverlay((props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setCarregando(true)
 
     // ✅ AGUARDA getListas terminar
     const listas = await getListas();
@@ -97,6 +100,8 @@ const contactDialog = createOverlay((props) => {
       } else {
         setError('Ocorreu um erro ao cadastrar a lista. Verifique se você tem permissão de acesso e tente novamente em instantes.');
       }
+    } finally {
+      setCarregando(false) // ✅ Sempre desliga o loading, com erro ou não
     }
 
     // Fecha o dialog
@@ -112,6 +117,7 @@ const contactDialog = createOverlay((props) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
+            {carregando && <Loading />}
             <form onSubmit={handleSubmit}> {/* ✅ Sem parâmetros aqui */}
               <Dialog.Header>
                 <Dialog.Title>Nova lista de compras</Dialog.Title>
@@ -141,7 +147,7 @@ const contactDialog = createOverlay((props) => {
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancelar</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit" colorPalette={'green'}>Cadastrar</Button>
+                <Button type="submit" colorPalette={'green'} disabled={carregando}>Cadastrar</Button>
               </Dialog.Footer>
             </form>
           </Dialog.Content>
@@ -164,7 +170,7 @@ const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => { // ✅ Recebe prod
         }}
         variant="solid" 
         colorPalette="green" 
-        size="sm" 
+        size="lg" 
         my={'5'} 
         w={'100%'}
       >

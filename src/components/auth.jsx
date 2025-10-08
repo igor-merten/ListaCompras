@@ -109,6 +109,7 @@ const Auth = () => {
               _hover={{ bg: 'gray.50' }}
               _active={{ bg: 'gray.100' }}
               mt={10}
+              size={'xl'}
             >
               <Flex align="center" gap={2}>
                 <FcGoogle size={20} />

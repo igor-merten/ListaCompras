@@ -7,7 +7,7 @@ import ModalNovaListaDeCompras from './ModalNovaListaDeCompras'
 import Sidebar from '../navbar'
 import Loading from '../Loading'
 
-import { Table, Heading, Button, Grid, GridItem, Box, Text } from "@chakra-ui/react"
+import { Table, Heading, Button, Grid, GridItem, Box, Text, Flex } from "@chakra-ui/react"
 import { LuPlus, LuMinus } from "react-icons/lu"
 
 import { db, auth } from '../../config/firebase'
@@ -18,37 +18,37 @@ import { onAuthStateChanged } from 'firebase/auth'
 const ProdutoRow = memo(({ produto, onAdicionar, onReduzir }) => {
   return (
     <Table.Row>
-      <Table.Cell fontSize="md">
+      <Table.Cell fontSize="lg" py={8} px={0}>
         {produto.nome}
       </Table.Cell>
-      <Table.Cell textAlign="end" width={"200px"}>
-        <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(10, 1fr)" alignItems={'center'} gap={'1'}>
-          <GridItem colSpan={4}>
-            <Button 
-              size={'sm'} 
-              variant={'outline'} 
-              onClick={() => onReduzir(produto.id)}
-              _active={{ transform: 'scale(0.95)', bg: 'gray.100' }}
-              transition="all 0.05s"
-            >
-              <LuMinus />
-            </Button>
-          </GridItem>
-          <GridItem fontSize="md" colSpan={2}>
+
+      <Table.Cell textAlign="end" width="150px" px={0}>
+        <Flex align="center" justify="center" gap={1}>
+          <Button
+            size="md"
+            variant="outline"
+            onClick={() => onAdicionar(produto.id)}
+            _active={{ transform: 'scale(0.95)', bg: 'gray.100' }}
+            transition="all 0.05s"
+          >
+            <LuPlus />
+          </Button>
+
+          <Box fontSize="lg" minW="40px" textAlign="center">
             {produto.quantidade}
-          </GridItem>
-          <GridItem colSpan={4}>
-            <Button 
-              size={'sm'} 
-              variant={'outline'} 
-              onClick={() => onAdicionar(produto.id)}
-              _active={{ transform: 'scale(0.95)', bg: 'gray.100' }}
-              transition="all 0.05s"
-            >
-              <LuPlus />
-            </Button>
-          </GridItem>
-        </Grid>
+          </Box>
+
+          <Button
+            size="md"
+            variant="outline"
+            onClick={() => onReduzir(produto.id)}
+            _active={{ transform: 'scale(0.95)', bg: 'gray.100' }}
+            disabled={produto.quantidade === 0}
+            transition="all 0.05s"
+          >
+            <LuMinus />
+          </Button>
+        </Flex>
       </Table.Cell>
     </Table.Row>
   );
@@ -65,7 +65,7 @@ const CategoriaSection = memo(({ categoria, produtos, onAdicionar, onReduzir, on
 
   return (
     <div>
-      <Heading mt={'5'}>{categoria.nome}</Heading>
+      <Heading size={'2xl'} mt={'5'}>{categoria.nome}</Heading>
       <Table.Root mt={'2'}>
         <Table.Caption />
         <Table.Body borderTopWidth="1px">
@@ -152,6 +152,13 @@ function NovaLista() {
         // Não busca do DB novamente
       } catch(err) {
         console.error(err)
+
+        // 💡 Verifica se é erro de conexão
+        if (!navigator.onLine) {
+          setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+        } else {
+          setError('Ocorreu um erro ao carregar os produtos. Verifique se você tem permissão de acesso.');
+        }
       }
     }
     
@@ -225,6 +232,7 @@ function NovaLista() {
   return (
     <div className='NovaLista'>
       <Sidebar />
+      
       <div className='ContentApp'>
       {error && (
           <Box

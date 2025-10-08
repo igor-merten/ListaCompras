@@ -145,10 +145,10 @@ function App() {
           </Box>
         )}
 
-        <Heading mt={'5'} size={'md'}>Minhas Listas</Heading>
+        <Heading mt={'5'} size={'2xl'}>Minhas Listas</Heading>
 
         {/* Lista pendentes  */}
-        <Heading mt={'3'} mb={"2"} size={'xl'} textAlign={'left'}>Pendentes</Heading>
+        <Heading mt={'3'} mb={"2"} size={'md'} textAlign={'left'}>Pendentes</Heading>
         <VStack align="stretch" spacing={4} mb={2}>
           {listas.filter((lista) => !lista.concluida).length === 0 ? (
             <Text color="gray.500" 
@@ -179,7 +179,7 @@ function App() {
         </VStack>
 
         {/* Listas Concluídas */}
-        <Heading mt={'5'} mb={"2"} size={'xl'} textAlign={'left'}>Concluídas</Heading>
+        <Heading mt={'5'} mb={"2"} size={'md'} textAlign={'left'}>Concluídas</Heading>
         <VStack align="stretch" spacing={4} mb={2}>
         {listas.filter((lista) => lista.concluida).length === 0 ? (
             <Text color="gray.500" 
@@ -215,7 +215,7 @@ function App() {
             width={'100%'}
             variant="solid" 
             colorPalette="green" 
-            size="sm" 
+            size="lg" 
             my={'3'}
           >
             <LuPlus  /> Nova lista
