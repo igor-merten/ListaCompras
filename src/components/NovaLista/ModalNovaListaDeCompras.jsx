@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom"
 import Loading from "../Loading"
 
 const contactDialog = createOverlay((props) => {
-  const { produtos, ...rest } = props // ✅ Recebe produtos das props
+  const { produtos, ...rest } = props
   const navigate = useNavigate();
   const [carregando, setCarregando] = useState(false)
 
@@ -29,14 +29,22 @@ const contactDialog = createOverlay((props) => {
   }).replace(/^\w/, (c) => c.toUpperCase())
   )
 
-  const [error, setError] = useState(null) // ⚠️ Novo estado para mensagens de erro
+  const [error, setError] = useState(null)
 
   const listasComprasRef = collection(db, 'ListasCompras');
 
-  // Função para buscar listas
+  // ✅ Função com timeout de 10 segundos
   const getListas = async () => {
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('timeout')), 10000)
+    );
+
     try {
-      const data = await getDocs(listasComprasRef);
+      const data = await Promise.race([
+        getDocs(listasComprasRef),
+        timeoutPromise
+      ]);
+      
       const filteredData = data.docs.map((doc) => ({
         ...doc.data()
       }));
@@ -45,71 +53,94 @@ const contactDialog = createOverlay((props) => {
       
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
-      return [];
+      
+      // ✅ Tratamento de erro melhorado
+      if (!navigator.onLine || error.message === 'timeout') {
+        throw new Error('offline');
+      }
+      
+      throw error;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setCarregando(true)
+    setError(null) // ✅ Limpa erro anterior
 
-    // ✅ AGUARDA getListas terminar
-    const listas = await getListas();
-    
-    // Agora você tem os dados e pode fazer suas checagens
-    // console.log('Dados recebidos:', listas);
-    // console.log('Produtos:', produtos); // ✅ produtos agora existe aqui
+    try {
+      // ✅ Busca listas com timeout
+      const listas = await getListas();
+      
+      // Verifica se o nome já existe e adiciona contador se necessário
+      let nomeAtualizado = nomeNovaListaCompras.trim();
+      let count = 1;
+      let novaLista = {}
 
-    // listas.forEach(l => {
-    //   console.log(l.nome)
-    // })
+      // Enquanto existir um nome igual, incrementa o contador
+      while (listas.some(l => l.nome.toUpperCase() === nomeAtualizado.toUpperCase())) {
+        count++;
+        nomeAtualizado = `${nomeNovaListaCompras} (${count})`;
+      }
 
-    // Verifica se o nome já existe e adiciona contador se necessário
-    let nomeAtualizado = nomeNovaListaCompras.trim(); // Remove espaços em branco
-    let count = 1;
-    let novaLista = {}
+      // Atualiza o estado
+      novaLista.nome = nomeAtualizado;
+      novaLista.produtos = produtos;
+      novaLista.data = Date.parse(new Date())
+      novaLista.concluida = false;
 
-    // Enquanto existir um nome igual, incrementa o contador
-    while (listas.some(l => l.nome.toUpperCase() === nomeAtualizado.toUpperCase())) {
-      count++;
-      nomeAtualizado = `${nomeNovaListaCompras} (${count})`;
-    }
+      // ✅ Timeout também no addDoc (10 segundos)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('timeout')), 10000)
+      );
 
-    // Atualiza o estado
-    novaLista.nome = nomeAtualizado;
-    novaLista.produtos = produtos;
-    novaLista.data = Date.parse(new Date())
-    novaLista.concluida = false;
+      await Promise.race([
+        addDoc(listasComprasRef, novaLista),
+        timeoutPromise
+      ]);
 
-    // console.log(novaLista)
-
-    try{
-      await addDoc(listasComprasRef, novaLista)
-
+      // ✅ Sucesso! Navega e fecha
       navigate('/') 
-
       props.onOpenChange?.({ open: false });
       setNomeNovaListaCompras("");
 
-    } catch(err){
+    } catch(err) {
       console.error(err)
 
-      // 💡 Verifica se é erro de conexão
-      if (!navigator.onLine) {
-        setError('Você está offline. Verifique sua conexão com a internet e tente novamente.');
+      // ✅ Mensagens de erro padronizadas
+      if (err.message === 'offline' || !navigator.onLine || err.message === 'timeout') {
+        setError('Você está offline. Por favor, verifique sua conexão com a internet.');
       } else {
         setError('Ocorreu um erro ao cadastrar a lista. Verifique se você tem permissão de acesso e tente novamente em instantes.');
       }
     } finally {
-      setCarregando(false) // ✅ Sempre desliga o loading, com erro ou não
+      setCarregando(false)
+    }
+  }
+
+  // ✅ Listeners de conexão
+  useEffect(() => {
+    const handleOffline = () => {
+      setError('Você está offline. Por favor, verifique sua conexão com a internet.');
+    };
+
+    const handleOnline = () => {
+      setError(null);
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    // ✅ Verifica imediatamente ao abrir o modal
+    if (!navigator.onLine) {
+      handleOffline();
     }
 
-    // Fecha o dialog
-    // props.onOpenChange?.({ open: false })
-
-    // Limpa o campo
-    // setNomeNovaListaCompras("")
-  }
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
   return (
     <Dialog.Root size={'xs'} {...rest}>
@@ -118,13 +149,13 @@ const contactDialog = createOverlay((props) => {
         <Dialog.Positioner>
           <Dialog.Content>
             {carregando && <Loading />}
-            <form onSubmit={handleSubmit}> {/* ✅ Sem parâmetros aqui */}
+            <form onSubmit={handleSubmit}>
               <Dialog.Header>
                 <Dialog.Title>Nova lista de compras</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
                 <Stack gap="4">
-                {error && (
+                  {error && (
                     <Box
                       bg="red.50"
                       border="1px solid"
@@ -140,6 +171,7 @@ const contactDialog = createOverlay((props) => {
                     value={nomeNovaListaCompras}
                     onChange={(e) => setNomeNovaListaCompras(e.target.value)}
                     placeholder="Insira o nome da lista de compras"
+                    fontSize="16px"
                   />
                 </Stack>
               </Dialog.Body>
@@ -147,7 +179,9 @@ const contactDialog = createOverlay((props) => {
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancelar</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit" colorPalette={'green'} disabled={carregando}>Cadastrar</Button>
+                <Button type="submit" colorPalette={'green'} disabled={carregando}>
+                  Cadastrar
+                </Button>
               </Dialog.Footer>
             </form>
           </Dialog.Content>
@@ -158,14 +192,14 @@ const contactDialog = createOverlay((props) => {
 })
 
 
-const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => { // ✅ Recebe produtos
+const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => {
   return (
     <>
       <Button 
         onClick={() => {
           contactDialog.open("form", { 
-            produtos: produtos, // ✅ Passa produtos pro dialog
-            onSubmit: onSubmit  // ✅ Passa onSubmit do pai
+            produtos: produtos,
+            onSubmit: onSubmit
           })
         }}
         variant="solid" 

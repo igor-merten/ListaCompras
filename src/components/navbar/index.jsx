@@ -92,7 +92,7 @@ const Sidebar = () => {
       <Box
         bg="white"
         w="250px"
-        h="100vh"
+        h={{ base: "100dvh", sm: "100vh" }}
         position="fixed"
         right={isSidebarOpen ? "0" : "-250px"}
         top="0"
@@ -102,7 +102,7 @@ const Sidebar = () => {
         zIndex="1000"
         transition="right 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         boxShadow={isSidebarOpen ? "2xl" : { base: "none", md: "lg" }}
-        overflow="hidden"
+        overflow="auto"
       >
         {/* Logo */}
         <Flex alignItems="center" justifyContent="space-between" mb="8">
