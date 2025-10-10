@@ -17,19 +17,20 @@ import { getDocs, collection, addDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
 import { useNavigate } from "react-router-dom"
 import Loading from "../Loading"
+import { useStatusInternet } from '../CheckInternet'
 
 const contactDialog = createOverlay((props) => {
+  const isOnline = useStatusInternet();
   const { produtos, ...rest } = props
   const navigate = useNavigate();
   const [carregando, setCarregando] = useState(false)
+  const [erroNome, setErroNome] = useState("")
 
   const [nomeNovaListaCompras, setNomeNovaListaCompras] = useState(new Date().toLocaleDateString('pt-BR', { 
     month: 'long', 
     year: 'numeric' 
   }).replace(/^\w/, (c) => c.toUpperCase())
   )
-
-  const [error, setError] = useState(null)
 
   const listasComprasRef = collection(db, 'ListasCompras');
 
@@ -54,11 +55,6 @@ const contactDialog = createOverlay((props) => {
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       
-      // ✅ Tratamento de erro melhorado
-      if (!navigator.onLine || error.message === 'timeout') {
-        throw new Error('offline');
-      }
-      
       throw error;
     }
   };
@@ -66,9 +62,15 @@ const contactDialog = createOverlay((props) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setCarregando(true)
-    setError(null) // ✅ Limpa erro anterior
 
     try {
+      if(nomeNovaListaCompras.trim() == ""){
+        setErroNome("Por favor, insira o nome da lista de compras.")
+        return;
+      }
+
+      setErroNome("")
+
       // ✅ Busca listas com timeout
       const listas = await getListas();
       
@@ -106,46 +108,15 @@ const contactDialog = createOverlay((props) => {
 
     } catch(err) {
       console.error(err)
-
-      // ✅ Mensagens de erro padronizadas
-      if (err.message === 'offline' || !navigator.onLine || err.message === 'timeout') {
-        setError('Você está offline. Por favor, verifique sua conexão com a internet.');
-      } else {
-        setError('Ocorreu um erro ao cadastrar a lista. Verifique se você tem permissão de acesso e tente novamente em instantes.');
-      }
     } finally {
       setCarregando(false)
     }
   }
 
-  // ✅ Listeners de conexão
-  useEffect(() => {
-    const handleOffline = () => {
-      setError('Você está offline. Por favor, verifique sua conexão com a internet.');
-    };
-
-    const handleOnline = () => {
-      setError(null);
-    };
-
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
-
-    // ✅ Verifica imediatamente ao abrir o modal
-    if (!navigator.onLine) {
-      handleOffline();
-    }
-
-    return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
-    };
-  }, []);
-
   return (
     <Dialog.Root size={'xs'} {...rest}>
       <Portal>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="blackAlpha.300" />
         <Dialog.Positioner>
           <Dialog.Content>
             {carregando && <Loading />}
@@ -155,31 +126,24 @@ const contactDialog = createOverlay((props) => {
               </Dialog.Header>
               <Dialog.Body>
                 <Stack gap="4">
-                  {error && (
-                    <Box
-                      bg="red.50"
-                      border="1px solid"
-                      borderColor="red.200"
-                      color="red.700"
-                      p="2"
-                      borderRadius="md"
-                    >
-                      <Text fontSize="sm">{error}</Text>
-                    </Box>
-                  )}
-                  <Input
-                    value={nomeNovaListaCompras}
-                    onChange={(e) => setNomeNovaListaCompras(e.target.value)}
-                    placeholder="Insira o nome da lista de compras"
-                    fontSize="16px"
-                  />
+                  <Field.Root invalid={!!erroNome}>
+                    <Input
+                      value={nomeNovaListaCompras}
+                      onChange={(e) => setNomeNovaListaCompras(e.target.value)}
+                      placeholder="Insira o nome da lista de compras"
+                      fontSize="16px"
+                    />
+                    {erroNome && (
+                      <Field.ErrorText>{erroNome}</Field.ErrorText>
+                    )}
+                  </Field.Root>
                 </Stack>
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancelar</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit" colorPalette={'green'} disabled={carregando}>
+                <Button type="submit" colorPalette={'green'} disabled={!isOnline}>
                   Cadastrar
                 </Button>
               </Dialog.Footer>
@@ -192,7 +156,7 @@ const contactDialog = createOverlay((props) => {
 })
 
 
-const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => {
+const ModalNovaListaDeCompras = ({ onSubmit, produtos, isOnline }) => {
   return (
     <>
       <Button 
@@ -207,6 +171,7 @@ const ModalNovaListaDeCompras = ({ onSubmit, produtos }) => {
         size="lg" 
         my={'5'} 
         w={'100%'}
+        disabled={!isOnline}
       >
         <LuCheck /> Cadastrar lista de compras
       </Button>

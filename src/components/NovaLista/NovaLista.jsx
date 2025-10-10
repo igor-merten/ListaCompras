@@ -7,7 +7,10 @@ import ModalNovaListaDeCompras from './ModalNovaListaDeCompras'
 import Sidebar from '../navbar'
 import Loading from '../Loading'
 
+import {CheckInternet, useStatusInternet} from '../CheckInternet'
+
 import { Table, Heading, Button, Grid, GridItem, Box, Text, Flex } from "@chakra-ui/react"
+// import { toaster } from "@/components/ui/toaster"
 import { LuPlus, LuMinus } from "react-icons/lu"
 
 import { db, auth } from '../../config/firebase'
@@ -91,6 +94,9 @@ const CategoriaSection = memo(({ categoria, produtos, onAdicionar, onReduzir, on
 });
 
 function NovaLista() {
+  const isOnline = useStatusInternet();
+  // useCheckInternet();
+  
   const [categorias, setCategorias] = useState([]);
   const [produtos, setProdutos] = useState({});
   const [isCategoriasLoading, setIsCategoriasLoading] = useState(true);
@@ -229,9 +235,11 @@ function NovaLista() {
     return <Auth />;
   }
 
+
   return (
     <div className='NovaLista'>
       <Sidebar />
+      {/* <CheckInternet /> */}
       
       <div className='ContentApp'>
       {error && (
@@ -261,6 +269,7 @@ function NovaLista() {
         <div>
           <ModalNovaListaDeCompras
             produtos={produtosComQuantidade}
+            isOnline={isOnline}
           />
         </div>
       </div>

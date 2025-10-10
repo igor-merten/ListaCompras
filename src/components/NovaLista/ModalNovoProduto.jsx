@@ -6,19 +6,31 @@ import {
   Stack,
   createOverlay,
   Group,
-  RadioCard
+  RadioCard,
+  Field
 } from "@chakra-ui/react"
 import { LuCirclePlus  } from "react-icons/lu"
 import { useState } from "react"
 
+import { useStatusInternet } from '../CheckInternet'
+
 const contactDialog = createOverlay((props) => {
   const { ...rest } = props
 
+  const isOnline = useStatusInternet();
   const [name, setName] = useState("")
+  const [erroNome, setErroNome] = useState("")
   const [cadastrarDb, setCadastrarDb] = useState(true)
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if(name.trim() == ""){
+      setErroNome("Por favor, insira o nome do produto.")
+      return;
+    }
+
+    setErroNome("")
 
     // Close dialog using injected `onOpenChange` prop
     props.onOpenChange?.({ open: false })
@@ -38,7 +50,7 @@ const contactDialog = createOverlay((props) => {
   return (
     <Dialog.Root size={'xs'} {...rest}>
       <Portal>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="blackAlpha.300" />
         <Dialog.Positioner>
           <Dialog.Content>
             <form onSubmit={e => handleSubmit(e, props)}>
@@ -47,12 +59,17 @@ const contactDialog = createOverlay((props) => {
                 </Dialog.Header>
               <Dialog.Body>
                 <Stack gap="4">
-                  <Input
-                    value={name}
-                    fontSize="16px"
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Insira o nome do produto"
-                  />
+                  <Field.Root invalid={!!erroNome}>
+                    <Input
+                      value={name}
+                      fontSize="16px"
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Insira o nome do produto"
+                    />
+                    {erroNome && (
+                      <Field.ErrorText>{erroNome}</Field.ErrorText>
+                    )}
+                  </Field.Root>
                 </Stack>
                 {/* Radio para saber se produto deve ser mostrado em todas as listas */}
                 <RadioCard.Root maxW="sm" variant={'outline'} colorPalette="teal" defaultValue="true" mt={'5'} mb={'0'}>
@@ -90,7 +107,7 @@ const contactDialog = createOverlay((props) => {
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancelar</Button>
                 </Dialog.ActionTrigger>
-                  <Button type="submit" colorPalette={'green'}>Cadastrar</Button>
+                  <Button type="submit" colorPalette={'green'} disabled={!isOnline}>Cadastrar</Button>
               </Dialog.Footer>
             </form>
           </Dialog.Content>

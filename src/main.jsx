@@ -7,6 +7,9 @@ import App from './App.jsx'
 import ListaCompras from './components/ListaCompras.jsx'
 import NotFoundPage from './components/PaginaNaoEncontrada.jsx'
 import NovaLista from './components/NovaLista/NovaLista.jsx'
+import { Toaster } from './components/ui/toaster.jsx'
+
+import {CheckInternet} from './components/CheckInternet.js'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
@@ -38,6 +41,8 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ChakraProvider value={defaultSystem}>
+      <Toaster />
+      <CheckInternet />
       <RouterProvider router = {router} />
     </ChakraProvider>
   </React.StrictMode>

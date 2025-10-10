@@ -4,6 +4,7 @@ import './App.css'
 import Sidebar from './components/navbar/index'
 import Auth from './components/auth'
 import Loading from './components/Loading'
+import { CheckInternet } from './components/CheckInternet'
 
 import { db, auth } from './config/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -56,6 +57,7 @@ const ListCard = ({ nome, data, concluida = false, icon: IconComponent }) => (
 );
 
 function App() {
+  // useCheckInternet()
   const [isListasLoading, setIsListasLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [user, setUser] = useState(null);
@@ -109,10 +111,20 @@ function App() {
 
   // Função para buscar categorias e produtos
   useEffect(() => {
-    getListas();
-  }, [])
+    if (user) {
+      // Pequeno delay para garantir que o token foi propagado
+      const timer = setTimeout(() => {
+        getListas();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setListas([]); // Limpa as listas se não houver usuário
+      setIsListasLoading(false);
+    }
+  }, [user]);
 
-  const isLoading = !isAuthReady || isListasLoading;
+  const isLoading = !isAuthReady || (user && isListasLoading);
   // Enquanto está verificando a autenticação, mostra o Loading
   if (isLoading) {
     return (<div><Sidebar /> <Loading /></div>);

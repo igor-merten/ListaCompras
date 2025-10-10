@@ -21,11 +21,12 @@ import {
 
 import { LuShoppingCart, LuPlus, LuCheck  } from 'react-icons/lu'
 
-
+import { useStatusInternet } from './CheckInternet'
 
 
 function ListaCompras() {
   // const [isLoading, setIsLoading] = useState(true);
+  const isOnline = useStatusInternet();
   const [isCategoriasLoading, setIsCategoriasLoading] = useState(true);
   const [isListaLoading, setIsListaLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -237,6 +238,7 @@ function ListaCompras() {
               onClick={finalizarLista}
               _active={{ transform: 'scale(0.98)' }}
               transition="all 0.05s"
+              disabled={!isOnline}
               >
                 <LuCheck  /> Finalizar lista
             </Button>
