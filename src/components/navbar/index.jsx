@@ -7,11 +7,14 @@ import {
   Flex,
   Button,
   Image,
-  useBreakpointValue
+  useBreakpointValue,
+  Accordion,
+  Span
 } from '@chakra-ui/react';
 import Logo from '../../assets/images/Logo.png'
-import { LuListTodo } from "react-icons/lu";
+import { LuListTodo, LuNotebook, LuMenu, LuBeef, LuLayoutList  } from "react-icons/lu";
 import { NavLink, useLocation } from 'react-router-dom';
+import { BiGasPump } from 'react-icons/bi';
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -60,7 +63,7 @@ const Sidebar = () => {
               _hover={{ bg: "gray.100", transform: "scale(1.05)" }}
               _active={{ transform: "scale(0.95)" }}
             >
-              ☰
+              <LuMenu />
             </Button>
           </Box>
 
@@ -116,6 +119,72 @@ const Sidebar = () => {
                   isActive={location.pathname === '/'}
                 />
               </NavLink>
+              <Accordion.Root variant="subtle" collapsible mt={2}>
+                <Accordion.Item     
+                  bg="#fff"
+                  css={{
+                    '&[data-state=open]': { border: '1px solid #eee' },
+                    // '&[data-state=closed]': { border: '1px solid #000' },
+                  }}>
+                  <Accordion.ItemTrigger
+                    _hover={{
+                      bg: 'gray.100',
+                      transform: "translateY(-1px)",
+                    }}
+                    transition="all 0.2s ease"
+                    px="0"
+                    py="0"
+                    borderRadius="lg"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    w="full"
+                    cursor="pointer"
+                  >
+                    <Flex
+                      align="center"
+                      gap="2"
+                      p="2"
+                      borderRadius="lg"
+                      cursor="pointer"
+                      color={'gray.600'}
+                      fontWeight={'medium'}
+                      _hover={{
+                        bg: 'gray.100',
+                        transform: "translateY(-1px)",
+                      }}
+                      transition="all 0.2s ease"
+                      justify="space-between"
+                      w="full"
+                    >
+                      <Flex align="center" gap="2">
+                        <Box><LuNotebook  /></Box>
+                        <Text>Itens</Text>
+                      </Flex>
+                      <Accordion.ItemIndicator />
+                    </Flex>
+                  </Accordion.ItemTrigger>
+
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody>
+                    <NavLink to={'/produtos'}>
+                      <MenuItem
+                        label="Produtos"
+                        icon={<LuBeef />}
+                        isActive={location.pathname.toLowerCase() === '/produtos'}
+                      />
+                    </NavLink>
+                    <NavLink to={'/categorias'}>
+                      <MenuItem
+                        label="Categorias"
+                        icon={<LuLayoutList />}
+                        isActive={location.pathname.toLowerCase() === '/produtos'}
+                      />
+                    </NavLink>
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              </Accordion.Root>
             </Box>
 
             {/* Logout */}
@@ -180,7 +249,7 @@ const MenuItem = ({ label, isActive, badge, icon }) => (
     p="2"
     borderRadius="lg"
     cursor="pointer"
-    bg={isActive ? 'blue.50' : 'transparent'}
+    // bg={isActive ? 'blue.50' : 'transparent'}
     color={isActive ? 'blue.600' : 'gray.600'}
     fontWeight={isActive ? 'semibold' : 'medium'}
     _hover={{
