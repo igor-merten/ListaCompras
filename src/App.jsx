@@ -11,47 +11,61 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { getDocs, collection, doc } from 'firebase/firestore'
 
 import { Tabs, AbsoluteCenter, Heading, Button, Card, Text, Box, Container, Flex, IconButton, VStack, HStack } from "@chakra-ui/react"
-import { LuSearch, LuPlus, LuChevronRight, LuCheck, LuList } from 'react-icons/lu'
+import { LuEye, LuPlus, LuChevronRight, LuCheck, LuList, LuSquarePen  } from 'react-icons/lu'
 
 import { Link } from 'react-router-dom'
 
 const ListCard = ({ nome, data, concluida = false, icon: IconComponent }) => (
   <Box
     bg="white"
-    borderRadius="xl"
-    border={'1px solid #ddd'}
-    p={4}
     mb={0}
     cursor="pointer"
   >
-    <HStack spacing={4} justify="space-between">
-      <HStack spacing={4}>
-        <Box
-          bg={concluida ? 'gray.100' : 'green.100'}
-          p={3}
-          borderRadius="lg"
-        >
-          <IconComponent
-            size={24}
-            color={concluida ? '#718096' : '#16a34a'}
-          />
-        </Box>
-        <Box>
-          <Text
-            textAlign={'left'}
-            fontSize="lg"
-            fontWeight="semibold"
-            color={concluida ? 'gray.400' : 'gray.800'}
-            textDecoration={concluida ? 'line-through' : 'none'}
+    <HStack spacing={0} align="stretch" gap={0}>
+      <Link to={`Lista/${data}`} style={{ width: '85%', textDecoration: 'none' }}>
+        <HStack spacing={0} width={'100%'} border={'1px solid #ddd'} roundedStart="xl" p={2} alignItems="start">
+          <Box
+          mt={1}
+            bg={concluida ? 'gray.100' : 'green.100'}
+            p={3}
+            borderRadius="lg"
           >
-            {nome}
-          </Text>
-          <Text fontSize="sm" color="gray.500" textAlign={'left'}>
-            Criada em {new Date(data).toLocaleDateString('pt-BR', {day: 'numeric', month: 'long', year: 'numeric'})}
-          </Text>
-        </Box>
-      </HStack>
-      <LuChevronRight size={24} color="#A0AEC0" />
+            <IconComponent
+              size={16}
+              color={concluida ? '#718096' : '#16a34a'}
+            />
+          </Box>
+          <Box>
+            <Text
+              textAlign={'left'}
+              fontSize="lg"
+              fontWeight="semibold"
+              color={concluida ? 'gray.400' : 'gray.800'}
+              textDecoration={concluida ? 'line-through' : 'none'}
+            >
+              {nome}
+            </Text>
+            <Text fontSize="sm" color="gray.500" textAlign={'left'}>
+              Criada em {new Date(data).toLocaleDateString('pt-BR', {day: 'numeric', month: 'long', year: 'numeric'})}
+            </Text>
+          </Box>
+        </HStack>
+      </Link>
+      <Link to={`Editar/${data}`} style={{ width: '15%', textDecoration: 'none' }}>
+        <Box
+          width="100%"
+          border={'1px solid #ddd'} 
+          roundedEnd="xl"
+          display="flex"
+          alignItems="center"
+          justifyContent="space-evenly"
+          borderLeft={"0px"}
+          px={0}
+          height={"100%"}
+        >
+        <LuSquarePen size={20} color="#A0AEC0" />
+      </Box>
+      </Link>
     </HStack>
   </Box>
 );
@@ -178,14 +192,14 @@ function App() {
           .sort((a, b) => a.nome.localeCompare(b.nome))
           .filter((lista) => !lista.concluida)
           .map((list, index) => (
-            <Link key={list.id} to={`Lista/${list.data}`}>
+            // <Link key={list.id} to={`Lista/${list.data}`}>
               <ListCard
                 key={index}
                 nome={list.nome}
                 data={list.data}
                 icon={LuList}
               />
-            </Link>
+            // </Link>
           ))
         )}
         </VStack>
