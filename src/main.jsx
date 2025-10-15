@@ -7,6 +7,7 @@ import App from './App.jsx'
 import ListaCompras from './components/ListaCompras.jsx'
 import NotFoundPage from './components/PaginaNaoEncontrada.jsx'
 import NovaLista from './components/NovaLista/NovaLista.jsx'
+import EditarLista from './components/EditarLista/EditarLista.jsx'
 import { Toaster } from './components/ui/toaster.jsx'
 
 import {CheckInternet} from './components/CheckInternet.js'
@@ -32,6 +33,11 @@ const router = createBrowserRouter([
   {
     path: '/Lista/:dataLista',
     element: <ListaCompras />,
+    errorElement: <NotFoundPage />
+  },
+  {
+    path: '/Editar/:dataLista',
+    element: <EditarLista />,
     errorElement: <NotFoundPage />
   }
 ], {
