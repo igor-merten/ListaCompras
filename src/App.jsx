@@ -4,7 +4,7 @@ import './App.css'
 import Sidebar from './components/navbar/index'
 import Auth from './components/auth'
 import Loading from './components/Loading'
-import { CheckInternet } from './components/CheckInternet'
+import { CheckInternet } from './components/Hooks/CheckInternet.js'
 
 import { db, auth } from './config/firebase'
 import { onAuthStateChanged } from 'firebase/auth'

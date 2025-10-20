@@ -12,7 +12,7 @@ import {
 import { LuCirclePlus  } from "react-icons/lu"
 import { useState } from "react"
 
-import { useStatusInternet } from '../CheckInternet'
+import { useStatusInternet } from '../Hooks/CheckInternet'
 
 const contactDialog = createOverlay((props) => {
   const { ...rest } = props

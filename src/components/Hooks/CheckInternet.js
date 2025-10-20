@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { toaster } from './ui/toaster';
+import { toaster } from '../ui/toaster';
 
 export function useStatusInternet() {
     const [userOnline, setUserOnline] = useState(navigator.onLine);

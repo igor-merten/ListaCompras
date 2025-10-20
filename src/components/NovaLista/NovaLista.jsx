@@ -7,7 +7,7 @@ import ModalNovaListaDeCompras from './ModalNovaListaDeCompras'
 import Sidebar from '../navbar'
 import Loading from '../Loading'
 
-import {CheckInternet, useStatusInternet} from '../CheckInternet'
+import {CheckInternet, useStatusInternet} from '../Hooks/CheckInternet'
 
 import { Table, Heading, Button, Grid, GridItem, Box, Text, Flex } from "@chakra-ui/react"
 // import { toaster } from "@/components/ui/toaster"

@@ -21,7 +21,7 @@ import {
 
 import { LuShoppingCart, LuPlus, LuCheck  } from 'react-icons/lu'
 
-import { useStatusInternet } from './CheckInternet'
+import { useStatusInternet } from './Hooks/CheckInternet'
 
 
 function ListaCompras() {

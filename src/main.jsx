@@ -10,7 +10,7 @@ import NovaLista from './components/NovaLista/NovaLista.jsx'
 import EditarLista from './components/EditarLista/EditarLista.jsx'
 import { Toaster } from './components/ui/toaster.jsx'
 
-import {CheckInternet} from './components/CheckInternet.js'
+import { CheckInternet } from './components/Hooks/CheckInternet.js'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'

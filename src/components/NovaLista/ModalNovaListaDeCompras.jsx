@@ -17,7 +17,7 @@ import { getDocs, collection, addDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
 import { useNavigate } from "react-router-dom"
 import Loading from "../Loading"
-import { useStatusInternet } from '../CheckInternet'
+import { useStatusInternet } from '../Hooks/CheckInternet'
 
 const contactDialog = createOverlay((props) => {
   const isOnline = useStatusInternet();
